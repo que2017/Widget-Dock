@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
@@ -13,6 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.demo.zhang.widgetdock.addwidget.AddWidgetActivity;
 
 public class MainService extends Service {
     private static final String TAG = MainService.class.getSimpleName();
@@ -49,16 +53,16 @@ public class MainService extends Service {
         params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
         // 设置窗口初始停靠位置
-        params.gravity = Gravity.LEFT | Gravity.TOP;
+        params.gravity = Gravity.RIGHT | Gravity.TOP;
         params.x = 0;
-        params.y = 0;
+        params.y = 500;
 
         //设置悬浮窗口长宽数据.
         //注意，这里的width和height均使用px而非dp.
         //如果你想完全对应布局设置，需要先获取到设备的dpi
         //px与dp的换算为px = dp * (dpi / 160).
-        params.width = 300;
-        params.height = 300;
+        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         // 获取浮动窗口视图所在的布局
@@ -83,10 +87,19 @@ public class MainService extends Service {
 
         button = (Button) toucherLayout.findViewById(R.id.bTouch);
         button.setOnClickListener(new View.OnClickListener() {
+            long[] hints = new long[2];
             @Override
             public void onClick(View v) {
-                stopSelf();
-//                onDestroy();
+                System.arraycopy(hints, 1, hints, 0, 1);
+                hints[hints.length - 1] = SystemClock.uptimeMillis();
+                if ((SystemClock.uptimeMillis() - hints[0] >= 700)) {
+                    Intent intent = new Intent();
+                    intent.setClass(MainService.this, AddWidgetActivity.class);
+                    startActivity(intent);
+                    Toast.makeText(MainService.this, "连续点两次退出", Toast.LENGTH_SHORT).show();
+                } else {
+                    stopSelf();
+                }
             }
         });
     }
