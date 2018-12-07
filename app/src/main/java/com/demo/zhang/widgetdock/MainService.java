@@ -1,5 +1,7 @@
 package com.demo.zhang.widgetdock;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +10,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,6 +29,8 @@ public class MainService extends Service {
 
     private Button button;
 
+    private Boolean shoudDestory = false;
+
     // 状态栏的高度
     int statusBarHeight = -1;
 
@@ -39,7 +44,23 @@ public class MainService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "MainService onCreate");
+//        foregroundRun();
         createToucher();
+    }
+
+    /**
+     * 使服务更好地运行在后台，不被销毁，不适用于本app
+     */
+    private void foregroundRun() {
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground);
+        builder.setContentTitle(getText(R.string.app_name));
+        builder.setContentText("Widget Dock is running");
+        builder.setContentIntent(pendingIntent);
+        Notification notification = builder.build();
+        startForeground(1, notification);
     }
 
     private void createToucher() {
@@ -98,6 +119,7 @@ public class MainService extends Service {
                     startActivity(intent);
                     Toast.makeText(MainService.this, "连续点两次退出", Toast.LENGTH_SHORT).show();
                 } else {
+                    shoudDestory = true;
                     stopSelf();
                 }
             }
@@ -108,5 +130,8 @@ public class MainService extends Service {
     public void onDestroy() {
         windowManager.removeView(toucherLayout);
         super.onDestroy();
+        if (!shoudDestory) {
+            startService(new Intent(this, MainService.class));
+        }
     }
 }
