@@ -19,7 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".addwidget.AddWidgetActivity"></activity>
+        <activity
+            android:name=".addwidget.AddWidgetActivity"
+            android:theme="@style/myTranspatent"></activity>
         <service
             android:name=".MainService"
             android:enabled="true"

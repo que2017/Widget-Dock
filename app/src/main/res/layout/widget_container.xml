@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:alpha="0.2"
-    android:background="@color/colorBlack">
+    android:background="@color/colorBlackTrans">
 
 </LinearLayout>
