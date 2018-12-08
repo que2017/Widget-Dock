@@ -3,10 +3,13 @@ package com.demo.zhang.widgetdock;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -21,8 +24,16 @@ import android.widget.Toast;
 
 import com.demo.zhang.widgetdock.addwidget.AddWidgetActivity;
 
+/**
+ * 为了让MainService保活采取了如下措施：（均无效）
+ * 1. 在AndroidManifest文件中设置优先级1000，android:priority="1000"
+ * 2. 设置MainService为前台进程，详见foregroundRun方法 startForeground
+ * 3. 在onDestroy方法中重新启动MainService
+ * 4. 设置双进程守护，RemoteService
+ */
 public class MainService extends Service {
     private static final String TAG = MainService.class.getSimpleName();
+
     private ConstraintLayout toucherLayout;
     private WindowManager.LayoutParams params;
     private WindowManager windowManager;
@@ -34,10 +45,39 @@ public class MainService extends Service {
     // 状态栏的高度
     int statusBarHeight = -1;
 
+    private MyBinder mBinder;
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            IMyAidlInterface iMyAidlInterface = IMyAidlInterface.Stub.asInterface(service);
+            try {
+                Log.i(TAG, "connected with " + iMyAidlInterface.getServiceName());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Toast.makeText(MainService.this, "链接断开，重新启动 RemoteService", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainService.this, RemoteService.class);
+            startService(intent);
+            bindService(intent, connection, Context.BIND_IMPORTANT);
+        }
+    };
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        mBinder = new MyBinder();
+        return mBinder;
+    }
+
+    private class MyBinder extends IMyAidlInterface.Stub {
+        @Override
+        public String getServiceName() throws RemoteException {
+            return MainService.class.getName();
+        }
     }
 
     @Override
@@ -46,6 +86,15 @@ public class MainService extends Service {
         Log.i(TAG, "MainService onCreate");
 //        foregroundRun();
         createToucher();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+//        foregroundRun();
+        Intent service = new Intent(MainService.this, RemoteService.class);
+        startService(service);
+        bindService(service, connection, Context.BIND_IMPORTANT);
+        return START_STICKY;
     }
 
     /**
@@ -129,9 +178,9 @@ public class MainService extends Service {
     @Override
     public void onDestroy() {
         windowManager.removeView(toucherLayout);
-        super.onDestroy();
         if (!shoudDestory) {
             startService(new Intent(this, MainService.class));
         }
+        super.onDestroy();
     }
 }

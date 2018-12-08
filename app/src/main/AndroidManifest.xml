@@ -20,10 +20,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".addwidget.AddWidgetActivity"></activity>
-        <service android:name=".MainService"
-            android:exported="false"
-            android:priority="1000">
-        </service>
+        <service
+            android:name=".MainService"
+            android:enabled="true"
+            android:exported="true"
+            android:priority="1000"></service>
+        <service
+            android:name=".RemoteService"
+            android:enabled="true"
+            android:exported="true"
+            android:priority="1000"
+            android:process=":RemoteProcess"></service>
     </application>
 
 </manifest>
