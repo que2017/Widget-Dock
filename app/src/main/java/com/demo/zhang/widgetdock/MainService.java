@@ -1,5 +1,6 @@
 package com.demo.zhang.widgetdock;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -23,6 +24,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.demo.zhang.widgetdock.addwidget.AddWidgetActivity;
+import com.demo.zhang.widgetdock.clicklistener.MyClickListener;
 
 /**
  * 为了让MainService保活采取了如下措施：（均无效）
@@ -60,9 +62,10 @@ public class MainService extends Service {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Toast.makeText(MainService.this, "链接断开，重新启动 RemoteService", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(MainService.this, RemoteService.class);
-            startService(intent);
-            bindService(intent, connection, Context.BIND_IMPORTANT);
+            // 当RemoteService被kill时拉起该服务
+//            Intent intent = new Intent(MainService.this, RemoteService.class);
+//            startService(intent);
+//            bindService(intent, connection, Context.BIND_IMPORTANT);
         }
     };
 
@@ -112,6 +115,7 @@ public class MainService extends Service {
         startForeground(1, notification);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void createToucher() {
         windowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
         params = new WindowManager.LayoutParams();
@@ -156,23 +160,20 @@ public class MainService extends Service {
         Log.i(TAG, "The status bar height is : " + statusBarHeight);
 
         button = (Button) toucherLayout.findViewById(R.id.bTouch);
-        button.setOnClickListener(new View.OnClickListener() {
-            long[] hints = new long[2];
+        button.setOnTouchListener(new MyClickListener(new MyClickListener.MyClickCallBack() {
             @Override
-            public void onClick(View v) {
-                System.arraycopy(hints, 1, hints, 0, 1);
-                hints[hints.length - 1] = SystemClock.uptimeMillis();
-                if ((SystemClock.uptimeMillis() - hints[0] >= 700)) {
-                    Intent intent = new Intent();
-                    intent.setClass(MainService.this, AddWidgetActivity.class);
-                    startActivity(intent);
-                    Toast.makeText(MainService.this, "连续点两次退出", Toast.LENGTH_SHORT).show();
-                } else {
-                    shoudDestory = true;
-                    stopSelf();
-                }
+            public void singleClick() {
+                Intent intent = new Intent();
+                intent.setClass(MainService.this, AddWidgetActivity.class);
+                startActivity(intent);
             }
-        });
+
+            @Override
+            public void doubleClick() {
+                shoudDestory = true;
+                stopSelf();
+            }
+        }));
     }
 
     @Override
