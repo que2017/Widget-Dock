@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -47,6 +49,13 @@ public class AddWidgetActivity extends Activity {
                 return true;
             }
         });
+        widgetWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        initWidget();
 
 //        frameLayout = new FrameLayout(this);
 //        frameLayout.setOnLongClickListener(new View.OnLongClickListener() {
@@ -59,6 +68,39 @@ public class AddWidgetActivity extends Activity {
 //        setContentView(frameLayout);
     }
 
+    private void initWidget() {
+        WidgetDatabase db = new WidgetDatabase(this);
+        try {
+            db.open();
+            Cursor cursor = db.queryAll();
+            if (cursor.moveToFirst()) {
+                do {
+                    int appWidgetId = cursor.getInt(cursor.getColumnIndex(WidgetDatabase.WIDGET_ID));
+                    completeAddAppWidget(appWidgetId);
+                } while (cursor.moveToNext());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null)
+            db.close();
+        }
+    }
+
+    private void insertToDB(int appWidgetId) {
+        WidgetDatabase db = new WidgetDatabase(this);
+        try {
+            db.open();
+            db.insert(appWidgetId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
@@ -68,7 +110,9 @@ public class AddWidgetActivity extends Activity {
                     addAppWidget(data);
                     break;
                 case REQUEST_CREATE_APPWIDGET:
-                    completeAddAppWidget(data);
+                    int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+                    completeAddAppWidget(appWidgetId);
+                    insertToDB(appWidgetId);
                     break;
             }
         } else if (requestCode == REQUEST_PICK_APPWIDGET
@@ -103,22 +147,23 @@ public class AddWidgetActivity extends Activity {
                 startActivityForResult(intent, REQUEST_CREATE_APPWIDGET);
             } else {
                 // 没有配置，直接添加
-                completeAddAppWidget(data);
+                completeAddAppWidget(appWidgetId);
+                insertToDB(appWidgetId);
             }
         }
     }
 
     /**
      * 添加widget
-     * @param data
+     * @param appWidgetId
      */
-    private void completeAddAppWidget(Intent data) {
-        Bundle bundle = data.getExtras();
-        int appWidgetId = bundle.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-        if(-1 == appWidgetId) {
-            return;
-        }
-        Log.i(TAG, "dumping extras content = " + bundle.toString());
+    private void completeAddAppWidget(int appWidgetId) {
+//        Bundle bundle = data.getExtras();
+//        int appWidgetId = bundle.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+//        if(-1 == appWidgetId) {
+//            return;
+//        }
+//        Log.i(TAG, "dumping extras content = " + bundle.toString());
         Log.i(TAG, "appWidgetId = " + appWidgetId);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
 
