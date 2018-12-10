@@ -1,16 +1,21 @@
 package com.demo.zhang.widgetdock.addwidget;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -18,7 +23,7 @@ import android.widget.LinearLayout;
 import com.demo.zhang.widgetdock.R;
 
 public class AddWidgetActivity extends Activity {
-    private static final String TAG = AddWidgetActivity.class.getClass().getSimpleName();
+    private static final String TAG = AddWidgetActivity.class.getSimpleName();
 
     private static final int REQUEST_PICK_APPWIDGET = 1;
     private static final int REQUEST_CREATE_APPWIDGET = 2;
@@ -30,6 +35,50 @@ public class AddWidgetActivity extends Activity {
     private AppWidgetManager mAppWidgetManager;
 //    private FrameLayout frameLayout;
     private LinearLayout widgetWrapper;
+
+    private class LongClickFrameLayout extends FrameLayout {
+        private boolean isLongClick = false;
+        private int appWidgetId;
+        private int timeout = 500;
+        private long start;
+        private long end = 0;
+
+        public LongClickFrameLayout(@Nullable Context context, int appWidgetId) {
+            super(context);
+            this.appWidgetId = appWidgetId;
+        }
+
+        public LongClickFrameLayout(@NonNull Context context) {
+            super(context);
+        }
+
+        public LongClickFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public LongClickFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+//            Log.i(TAG, "onInterceptTouchEvent action = " + ev.getAction());
+            int action = ev.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                isLongClick = false;
+                start = System.currentTimeMillis();
+            }
+            if (action == MotionEvent.ACTION_MOVE) {
+                end = System.currentTimeMillis();
+                if((end - start) > timeout && !isLongClick) {
+                    deleteWidgetDialog(appWidgetId);
+                    isLongClick = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +150,20 @@ public class AddWidgetActivity extends Activity {
         }
     }
 
+    private void deleteFromDB(int appWidgetId) {
+        WidgetDatabase db = new WidgetDatabase(this);
+        try {
+            db.open();
+            db.delete(appWidgetId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
@@ -158,17 +221,11 @@ public class AddWidgetActivity extends Activity {
      * @param appWidgetId
      */
     private void completeAddAppWidget(int appWidgetId) {
-//        Bundle bundle = data.getExtras();
-//        int appWidgetId = bundle.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-//        if(-1 == appWidgetId) {
-//            return;
-//        }
-//        Log.i(TAG, "dumping extras content = " + bundle.toString());
         Log.i(TAG, "appWidgetId = " + appWidgetId);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
 
         View hostView = mAppWidgetHost.createView(this, appWidgetId, appWidgetInfo);
-        FrameLayout frameLayout = new FrameLayout(this);
+        LongClickFrameLayout frameLayout = new LongClickFrameLayout(this, appWidgetId);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         frameLayout.setLayoutParams(lp);
         frameLayout.addView(hostView);
@@ -183,5 +240,29 @@ public class AddWidgetActivity extends Activity {
         Intent widgetPick = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
         widgetPick.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         startActivityForResult(widgetPick, REQUEST_PICK_APPWIDGET);
+    }
+
+    /**
+     * 弹出删除widget的对话框
+     */
+    private void deleteWidgetDialog(final int appWidgetId) {
+        AlertDialog.Builder ab = new AlertDialog.Builder(this);
+        ab.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteFromDB(appWidgetId);
+                widgetWrapper.removeAllViews();
+                initWidget();
+            }
+        });
+        ab.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        ab.setTitle("删除widget：");
+        ab.setMessage("确认要删除该widget吗？");
+        ab.show();
     }
 }
