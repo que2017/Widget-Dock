@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.demo.zhang.widgetdock.addwidget.AddWidgetActivity;
 import com.demo.zhang.widgetdock.clicklistener.MyClickListener;
+import com.demo.zhang.widgetdock.utils.ScreenUtils;
 
 /**
  * 为了让MainService保活采取了如下措施：（均无效）
@@ -117,6 +118,10 @@ public class MainService extends Service {
 
     @SuppressLint("ClickableViewAccessibility")
     private void createToucher() {
+        // 获取浮动窗口视图所在的布局
+        LayoutInflater inflater = LayoutInflater.from(getApplication());
+        toucherLayout = (ConstraintLayout) inflater.inflate(R.layout.activity_main, null);
+
         windowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
         params = new WindowManager.LayoutParams();
         // 设置type为系统提示型窗口，通常在应用程序的窗口之上
@@ -129,7 +134,7 @@ public class MainService extends Service {
         // 设置窗口初始停靠位置
         params.gravity = Gravity.RIGHT | Gravity.TOP;
         params.x = 0;
-        params.y = 500;
+        params.y = (new ScreenUtils(getApplication()).getScreenHeight() - 500) / 2;
 
         //设置悬浮窗口长宽数据.
         //注意，这里的width和height均使用px而非dp.
@@ -138,9 +143,6 @@ public class MainService extends Service {
         params.width = WindowManager.LayoutParams.WRAP_CONTENT;
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
-        LayoutInflater inflater = LayoutInflater.from(getApplication());
-        // 获取浮动窗口视图所在的布局
-        toucherLayout = (ConstraintLayout) inflater.inflate(R.layout.activity_main, null);
         // 添加toucherlayout
         windowManager.addView(toucherLayout, params);
 
