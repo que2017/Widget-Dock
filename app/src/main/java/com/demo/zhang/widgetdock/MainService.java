@@ -11,13 +11,13 @@ import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -163,11 +163,29 @@ public class MainService extends Service {
 
         button = (Button) toucherLayout.findViewById(R.id.bTouch);
         button.setOnTouchListener(new MyClickListener(new MyClickListener.MyClickCallBack() {
+            private boolean isFirstMove = true;
+            private int initY;
+            private int paramsY;
             @Override
             public void singleClick() {
                 Intent intent = new Intent();
                 intent.setClass(MainService.this, AddWidgetActivity.class);
                 startActivity(intent);
+            }
+
+            @Override
+            public void longClickMove(MotionEvent event) {
+                if (isFirstMove) {
+                    initY = (int) event.getRawY();
+                    paramsY = params.y;
+                    isFirstMove = false;
+                } else {
+                    params.y = paramsY + (int) event.getRawY() - initY;
+                    windowManager.updateViewLayout(toucherLayout, params);
+                }
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    isFirstMove = true;
+                }
             }
 
             @Override
