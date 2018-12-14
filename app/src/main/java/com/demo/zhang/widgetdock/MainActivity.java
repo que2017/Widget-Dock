@@ -2,11 +2,13 @@ package com.demo.zhang.widgetdock;
 
 import android.Manifest;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -32,9 +34,10 @@ public class MainActivity extends AppCompatActivity {
                 startService(intent);
                 finish();
             } else {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                Log.i(TAG, "Need permission.");
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivity(intent);
+                Toast.makeText(this, "请开启该权限，否则Widget Dock将无法使用！", Toast.LENGTH_LONG).show();
+                finish();
             }
         } else {
             Intent intent = new Intent(MainActivity.this, MainService.class);
