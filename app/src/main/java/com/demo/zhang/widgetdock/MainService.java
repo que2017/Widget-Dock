@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -36,6 +37,7 @@ import com.demo.zhang.widgetdock.utils.ScreenUtils;
  */
 public class MainService extends Service {
     private static final String TAG = MainService.class.getSimpleName();
+    private static final int BUILD_VERSION_O = 26;
 
     private ConstraintLayout toucherLayout;
     private WindowManager.LayoutParams params;
@@ -125,8 +127,12 @@ public class MainService extends Service {
 
         windowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
         params = new WindowManager.LayoutParams();
-        // 设置type为系统提示型窗口，通常在应用程序的窗口之上
-        params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        // 设置type为系统提示型窗口，通常在应用程序的窗口之上。O版需要设置TYPE_APPLICATION_OVERLAY
+        if (Build.VERSION.SDK_INT >= BUILD_VERSION_O) {
+            params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        }
         // 设置效果为背景透明
         params.format = PixelFormat.RGBA_8888;
         // 设置flags.不可聚焦及不可使用按钮对悬浮窗进行操控.
@@ -166,6 +172,7 @@ public class MainService extends Service {
             public void singleClick() {
                 Intent intent = new Intent();
                 intent.setClass(MainService.this, AddWidgetActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
 
