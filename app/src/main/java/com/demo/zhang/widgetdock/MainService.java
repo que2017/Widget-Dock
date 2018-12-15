@@ -146,11 +146,6 @@ public class MainService extends Service {
         // 添加toucherlayout
         windowManager.addView(toucherLayout, params);
 
-        Log.i(TAG,"toucherlayout-->left:" + toucherLayout.getLeft());
-        Log.i(TAG,"toucherlayout-->right:" + toucherLayout.getRight());
-        Log.i(TAG,"toucherlayout-->top:" + toucherLayout.getTop());
-        Log.i(TAG,"toucherlayout-->bottom:" + toucherLayout.getBottom());
-
         // 计算当前View的宽高
         toucherLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 

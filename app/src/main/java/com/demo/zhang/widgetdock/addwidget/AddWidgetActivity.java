@@ -33,7 +33,6 @@ public class AddWidgetActivity extends Activity {
 
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
-//    private FrameLayout frameLayout;
     private LinearLayout widgetWrapper;
 
     private class LongClickFrameLayout extends FrameLayout {
@@ -62,7 +61,7 @@ public class AddWidgetActivity extends Activity {
 
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
-//            Log.i(TAG, "onInterceptTouchEvent action = " + ev.getAction());
+            Log.i(TAG, "onInterceptTouchEvent action = " + ev.getAction());
             int action = ev.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
                 isLongClick = false;
@@ -105,16 +104,12 @@ public class AddWidgetActivity extends Activity {
             }
         });
         initWidget();
+    }
 
-//        frameLayout = new FrameLayout(this);
-//        frameLayout.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View view) {
-//                showWidgetPickDialog();
-//                return true;
-//            }
-//        });
-//        setContentView(frameLayout);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
     }
 
     private void initWidget() {
@@ -131,8 +126,9 @@ public class AddWidgetActivity extends Activity {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (db != null)
-            db.close();
+            if (db != null) {
+                db.close();
+            }
         }
     }
 
@@ -221,7 +217,7 @@ public class AddWidgetActivity extends Activity {
      * @param appWidgetId
      */
     private void completeAddAppWidget(int appWidgetId) {
-        Log.i(TAG, "appWidgetId = " + appWidgetId);
+        Log.i(TAG, "Add widget : appWidgetId = " + appWidgetId);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
 
         View hostView = mAppWidgetHost.createView(this, appWidgetId, appWidgetInfo);
