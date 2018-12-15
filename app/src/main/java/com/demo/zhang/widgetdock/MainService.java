@@ -37,7 +37,6 @@ import com.demo.zhang.widgetdock.utils.ScreenUtils;
  */
 public class MainService extends Service {
     private static final String TAG = MainService.class.getSimpleName();
-    private static final int BUILD_VERSION_O = 26;
 
     private ConstraintLayout toucherLayout;
     private WindowManager.LayoutParams params;
@@ -128,7 +127,7 @@ public class MainService extends Service {
         windowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
         params = new WindowManager.LayoutParams();
         // 设置type为系统提示型窗口，通常在应用程序的窗口之上。O版需要设置TYPE_APPLICATION_OVERLAY
-        if (Build.VERSION.SDK_INT >= BUILD_VERSION_O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
             params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
