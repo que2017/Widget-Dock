@@ -43,46 +43,47 @@ public class MainService extends Service {
 
     private Button button;
 
-    private Boolean shoudDestory = false;
+    private Boolean shouldDestory = false;
 
     // 状态栏的高度
     int statusBarHeight = -1;
 
-    private MyBinder mBinder;
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            IMyAidlInterface iMyAidlInterface = IMyAidlInterface.Stub.asInterface(service);
-            try {
-                Log.i(TAG, "connected with " + iMyAidlInterface.getServiceName());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Toast.makeText(MainService.this, "链接断开，重新启动 RemoteService", Toast.LENGTH_SHORT).show();
+//    private MyBinder mBinder;
+//    private ServiceConnection connection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            IMyAidlInterface iMyAidlInterface = IMyAidlInterface.Stub.asInterface(service);
+//            try {
+//                Log.i(TAG, "connected with " + iMyAidlInterface.getServiceName());
+//            } catch (RemoteException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            Toast.makeText(MainService.this, "链接断开，重新启动 RemoteService", Toast.LENGTH_SHORT).show();
             // 当RemoteService被kill时拉起该服务
 //            Intent intent = new Intent(MainService.this, RemoteService.class);
 //            startService(intent);
 //            bindService(intent, connection, Context.BIND_IMPORTANT);
-        }
-    };
+//        }
+//    };
 
-    @Nullable
+//    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        mBinder = new MyBinder();
-        return mBinder;
+//        mBinder = new MyBinder();
+//        return mBinder;
+        return null;
     }
 
-    private class MyBinder extends IMyAidlInterface.Stub {
-        @Override
-        public String getServiceName() throws RemoteException {
-            return MainService.class.getName();
-        }
-    }
+//    private class MyBinder extends IMyAidlInterface.Stub {
+//        @Override
+//        public String getServiceName() throws RemoteException {
+//            return MainService.class.getName();
+//        }
+//    }
 
     @Override
     public void onCreate() {
@@ -92,29 +93,29 @@ public class MainService extends Service {
         createToucher();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
 //        foregroundRun();
-        Intent service = new Intent(MainService.this, RemoteService.class);
-        startService(service);
-        bindService(service, connection, Context.BIND_IMPORTANT);
-        return START_STICKY;
-    }
+//        Intent service = new Intent(MainService.this, RemoteService.class);
+//        startService(service);
+//        bindService(service, connection, Context.BIND_IMPORTANT);
+//        return START_STICKY;
+//    }
 
-    /**
-     * 使服务更好地运行在后台，不被销毁，不适用于本app
-     */
-    private void foregroundRun() {
-        Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setSmallIcon(R.drawable.ic_launcher_foreground);
-        builder.setContentTitle(getText(R.string.app_name));
-        builder.setContentText("Widget Dock is running");
-        builder.setContentIntent(pendingIntent);
-        Notification notification = builder.build();
-        startForeground(1, notification);
-    }
+//    /**
+//     * 使服务更好地运行在后台，不被销毁，不适用于本app
+//     */
+//    private void foregroundRun() {
+//        Intent intent = new Intent(this, MainActivity.class);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+//        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+//        builder.setSmallIcon(R.drawable.ic_launcher_foreground);
+//        builder.setContentTitle(getText(R.string.app_name));
+//        builder.setContentText("Widget Dock is running");
+//        builder.setContentIntent(pendingIntent);
+//        Notification notification = builder.build();
+//        startForeground(1, notification);
+//    }
 
     @SuppressLint("ClickableViewAccessibility")
     private void createToucher() {
@@ -185,7 +186,7 @@ public class MainService extends Service {
 
             @Override
             public void doubleClick() {
-                shoudDestory = true;
+                shouldDestory = true;
                 stopSelf();
             }
         }));
@@ -194,7 +195,7 @@ public class MainService extends Service {
     @Override
     public void onDestroy() {
         windowManager.removeView(toucherLayout);
-        if (!shoudDestory) {
+        if (!shouldDestory) {
             startService(new Intent(this, MainService.class));
         }
         super.onDestroy();
