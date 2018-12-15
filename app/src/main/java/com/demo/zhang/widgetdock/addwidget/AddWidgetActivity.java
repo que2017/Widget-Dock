@@ -34,6 +34,7 @@ public class AddWidgetActivity extends Activity {
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
     private LinearLayout widgetWrapper;
+    private boolean shouldFinish = true;
 
     private class LongClickFrameLayout extends FrameLayout {
         private boolean isLongClick = false;
@@ -93,6 +94,7 @@ public class AddWidgetActivity extends Activity {
         widgetWrapper.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
+                shouldFinish = false;
                 showWidgetPickDialog();
                 return true;
             }
@@ -109,7 +111,10 @@ public class AddWidgetActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        finish();
+        if (shouldFinish) {
+            finish();
+        }
+        shouldFinish = true;
     }
 
     private void initWidget() {

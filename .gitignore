@@ -12,6 +12,7 @@
 bin/
 gen/
 captures/
+app/release/
 
 # Gradle files
 .gradle/
