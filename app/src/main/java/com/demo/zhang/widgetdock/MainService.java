@@ -36,7 +36,7 @@ public class MainService extends Service {
 
     private Button button;
 
-    private Boolean shouldDestory = false;
+    private Boolean shouldDestroy = false;
 
     // 状态栏的高度
     int statusBarHeight = -1;
@@ -124,7 +124,7 @@ public class MainService extends Service {
 
             @Override
             public void doubleClick() {
-                shouldDestory = true;
+                shouldDestroy = true;
                 stopSelf();
             }
         }));
@@ -133,7 +133,7 @@ public class MainService extends Service {
     @Override
     public void onDestroy() {
         windowManager.removeView(toucherLayout);
-        if (!shouldDestory) {
+        if (!shouldDestroy) {
             startService(new Intent(this, MainService.class));
         }
         super.onDestroy();
