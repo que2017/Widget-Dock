@@ -1,20 +1,13 @@
 package com.demo.zhang.widgetdock;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,7 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.demo.zhang.widgetdock.addwidget.AddWidgetActivity;
 import com.demo.zhang.widgetdock.clicklistener.MyClickListener;
@@ -49,74 +41,17 @@ public class MainService extends Service {
     // 状态栏的高度
     int statusBarHeight = -1;
 
-//    private MyBinder mBinder;
-//    private ServiceConnection connection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            IMyAidlInterface iMyAidlInterface = IMyAidlInterface.Stub.asInterface(service);
-//            try {
-//                Log.i(TAG, "connected with " + iMyAidlInterface.getServiceName());
-//            } catch (RemoteException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            Toast.makeText(MainService.this, "链接断开，重新启动 RemoteService", Toast.LENGTH_SHORT).show();
-            // 当RemoteService被kill时拉起该服务
-//            Intent intent = new Intent(MainService.this, RemoteService.class);
-//            startService(intent);
-//            bindService(intent, connection, Context.BIND_IMPORTANT);
-//        }
-//    };
-
-//    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-//        mBinder = new MyBinder();
-//        return mBinder;
         return null;
     }
-
-//    private class MyBinder extends IMyAidlInterface.Stub {
-//        @Override
-//        public String getServiceName() throws RemoteException {
-//            return MainService.class.getName();
-//        }
-//    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "MainService onCreate");
-//        foregroundRun();
         createToucher();
     }
-
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        foregroundRun();
-//        Intent service = new Intent(MainService.this, RemoteService.class);
-//        startService(service);
-//        bindService(service, connection, Context.BIND_IMPORTANT);
-//        return START_STICKY;
-//    }
-
-//    /**
-//     * 使服务更好地运行在后台，不被销毁，不适用于本app
-//     */
-//    private void foregroundRun() {
-//        Intent intent = new Intent(this, MainActivity.class);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-//        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-//        builder.setSmallIcon(R.drawable.ic_launcher_foreground);
-//        builder.setContentTitle(getText(R.string.app_name));
-//        builder.setContentText("Widget Dock is running");
-//        builder.setContentIntent(pendingIntent);
-//        Notification notification = builder.build();
-//        startForeground(1, notification);
-//    }
 
     @SuppressLint("ClickableViewAccessibility")
     private void createToucher() {
@@ -143,9 +78,6 @@ public class MainService extends Service {
         params.y = (new ScreenUtils(getApplication()).getScreenHeight() - 500) / 2;
 
         //设置悬浮窗口长宽数据.
-        //注意，这里的width和height均使用px而非dp.
-        //如果你想完全对应布局设置，需要先获取到设备的dpi
-        //px与dp的换算为px = dp * (dpi / 160).
         params.width = WindowManager.LayoutParams.WRAP_CONTENT;
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
 

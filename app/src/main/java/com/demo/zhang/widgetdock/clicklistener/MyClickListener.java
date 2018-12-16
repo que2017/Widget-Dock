@@ -1,7 +1,6 @@
 package com.demo.zhang.widgetdock.clicklistener;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 

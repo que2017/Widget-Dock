@@ -28,12 +28,6 @@
             android:enabled="true"
             android:exported="true"
             android:priority="1000"></service>
-        <service
-            android:name=".RemoteService"
-            android:enabled="true"
-            android:exported="true"
-            android:priority="1000"
-            android:process=":RemoteProcess"></service>
     </application>
 
 </manifest>
