@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class WidgetDatabase {
     private static final String TAG = WidgetDatabase.class.getSimpleName();
@@ -63,7 +64,10 @@ public class WidgetDatabase {
     public void insert(int appWidgetId){
         ContentValues values = new ContentValues();
         values.put(WIDGET_ID, appWidgetId);
-        mDatabase.insert(TB_NAME, null, values);
+        long row_id = mDatabase.insert(TB_NAME, null, values);
+        if (-1 == row_id) {
+            Log.d(TAG, "insert failed: " + appWidgetId);
+        }
     }
 
     public void delete(int appWidgetId) {
